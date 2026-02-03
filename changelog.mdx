@@ -1,0 +1,147 @@
+---
+title: Changelog
+description: Track the latest updates, improvements, and new features released in TinyEmail. Stay informed about version history and what's coming next.
+---
+
+## Recent Updates
+
+Stay up to date with the latest releases. Each update includes new features, improvements, bug fixes, and any breaking changes.
+
+<Update label="2024-10-15" description="v2.1.0" tags={["feature", "improvement"]}>
+
+## New Features
+
+- Added advanced audience segmentation with custom tags and behavioral triggers
+- Introduced A/B testing for email campaigns with automated winner selection
+- New form builder with conditional logic and multi-step forms
+
+## Improvements
+
+- Enhanced analytics dashboard with real-time open and click tracking
+- Optimized deliverability with improved IP warm-up algorithms
+- Faster template editor with drag-and-drop content blocks
+
+</Update>
+
+<Update label="2024-09-20" description="v2.0.0" tags={["feature", "breaking"]}>
+
+## New Features
+
+- Integrated webhook support for real-time event notifications
+- Added automation workflows for drip campaigns and re-engagement sequences
+- Native integration with Shopify for e-commerce order notifications
+
+## Breaking Changes
+
+- Updated API authentication to require JWT tokens instead of API keys. Migrate by generating new tokens from your dashboard.
+- Campaign API endpoints now use `POST /v2/campaigns` instead of `PUT /campaigns`.
+
+## Bug Fixes
+
+- Fixed intermittent deliverability reports not updating correctly
+- Resolved template preview issues in dark mode
+
+</Update>
+
+<Update label="2024-08-10" description="v1.5.0" tags={["bugfix", "improvement"]}>
+
+## Improvements
+
+- Increased daily email sending limits for free tier users
+- Better spam filter testing with integrated Inbox Preview tool
+
+## Bug Fixes
+
+- Fixed unsubscribe link generation errors for international domains
+- Corrected analytics discrepancies between dashboard and API exports
+- Patched potential XSS vulnerabilities in custom HTML templates
+
+</Update>
+
+## Migration Notes
+
+For breaking changes in recent releases, follow these steps to update your integration smoothly.
+
+<Expandable title="Migrating from v1.x to v2.0" default-open="true">
+
+1. Update your API client to use the new base URL: `https://api.tinyemail.com/v2`
+2. Replace API key auth with JWT tokens. Generate tokens via the dashboard at `https://app.tinyemail.com/settings/tokens`.
+3. Update campaign creation endpoints from `PUT /campaigns` to `POST /v2/campaigns`.
+
+<Callout kind="alert">
+Test all changes in staging before deploying to production.
+</Callout>
+
+</Expandable>
+
+## Upcoming Roadmap
+
+Discover what's coming next to TinyEmail.
+
+<Columns cols={3}>
+
+<Card title="AI-Powered Content" icon="zap" href="#">
+
+Generate personalized email copy and subject lines using AI suggestions.
+
+</Card>
+
+<Card title="Advanced Analytics" icon="bar-chart-3" href="#">
+
+Predictive engagement scoring and cohort analysis tools.
+
+</Card>
+
+<Card title="Multi-Channel" icon="smartphone" href="#">
+
+SMS and push notification integration alongside email.
+
+</Card>
+
+</Columns>
+
+## Stay Informed
+
+<Callout kind="tip">
+
+Subscribe to our changelog RSS feed or enable email notifications in your account settings at `https://app.tinyemail.com/notifications` to get instant updates on new releases.
+
+</Callout>
+
+<Tabs>
+
+<Tab title="Check for Updates" icon="refresh-cw">
+
+Follow these steps to verify you're on the latest version:
+
+<Steps>
+
+<Step title="Dashboard Check" icon="monitor">
+
+Log in to `https://app.tinyemail.com` and navigate to Settings > Version Info.
+
+</Step>
+
+<Step title="API Version" icon="code">
+
+Query the status endpoint:
+
+````javascript
+fetch('https://api.tinyemail.com/status')
+  .then(res => res.json())
+  .then(data => console.log(data.version));
+````
+
+</Step>
+
+</Steps>
+
+</Tab>
+
+<Tab title="Report Issues" icon="alert-triangle">
+
+Found a bug? Use our feedback form linked from the dashboard footer.
+
+</Tab>
+
+</Tabs>

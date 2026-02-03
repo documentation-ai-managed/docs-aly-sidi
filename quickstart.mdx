@@ -1,0 +1,139 @@
+---
+title: Getting Started with TinyEmail
+description: Set up your TinyEmail account and send your first email campaign in minutes. This guide covers account creation, initial configuration, and basic setup steps.
+---
+
+## Prerequisites
+
+<Callout kind="info" title="Before You Begin">
+Ensure you have:
+- A valid email address for sign-up
+- Your audience data ready (CSV file or manual entry)
+- Basic knowledge of email marketing best practices
+</Callout>
+
+## Sign Up for Your Free Trial
+
+Start by creating your TinyEmail account. The process takes less than 2 minutes.
+
+<Steps>
+  <Step title="Visit the Sign-Up Page" icon="external-link">
+    Go to the [TinyEmail sign-up page](https://app.tinyemail.com/sign-up).
+  </Step>
+  <Step title="Enter Your Details">
+    Provide your email, name, and password. Verify your email address via the confirmation link sent to your inbox.
+  </Step>
+  <Step title="Complete Onboarding">
+    Answer a few quick questions about your business to customize your dashboard.
+  </Step>
+</Steps>
+
+<Callout kind="success">
+  Congratulations! You now have access to the TinyEmail dashboard at [https://app.tinyemail.com](https://app.tinyemail.com).
+</Callout>
+
+## Dashboard Overview
+
+<Image
+  src="https://cdn.prod.website-files.com/66e9622abcfd6e59d8380b22/693a8a6cd649593fd54b85a5_main-hero-image-optimized.svg"
+  alt="TinyEmail dashboard showing email deliverability, engagement metrics, and navigation menu"
+  width="1200"
+  height="600"
+/>
+
+The dashboard provides quick access to key areas. Use the sidebar to navigate.
+
+<Columns cols={3}>
+  <Card title="Audience" icon="users" href="/docs/audience">
+    Manage subscribers and lists.
+  </Card>
+  <Card title="Campaigns" icon="mail" href="/docs/campaigns">
+    Create and track emails.
+  </Card>
+  <Card title="Analytics" icon="bar-chart-3" href="/docs/analytics">
+    View performance metrics.
+  </Card>
+</Columns>
+
+## Add Your First Audience List
+
+Build your subscriber list to start sending emails.
+
+<Steps>
+  <Step title="Navigate to Audience" icon="users">
+    Click `Audience` in the sidebar.
+  </Step>
+  <Step title="Create a New List">
+    Select `+ New List` and name it (e.g., "Newsletter Subscribers").
+  </Step>
+  <Step title="Import Subscribers">
+    Upload a CSV file or add manually.
+  </Step>
+</Steps>
+
+Here's a sample CSV format for import:
+
+````csv
+email,name,signup_date
+user@example.com,John Doe,2024-01-15
+jane@sample.com,Jane Smith,2024-01-16
+````
+
+## Create and Send Your First Campaign
+
+Launch a simple welcome email.
+
+<Tabs>
+  <Tab title="Drag-and-Drop Editor" icon="mouse-pointer">
+    <Steps>
+      <Step title="Start New Campaign" icon="plus">
+        Go to `Campaigns` > `+ New Campaign`.
+      </Step>
+      <Step title="Select Template">
+        Choose a `Welcome` template.
+      </Step>
+      <Step title="Customize Content">
+        Edit subject: `Welcome to TinyEmail!`
+        
+        Add your message:
+        
+````html
+<h1>Hello!</h1>
+<p>Thanks for joining. Start growing your audience today.</p>
+<p><a href="{UNSUBSCRIBE_LINK}">Unsubscribe</a></p>
+````
+      </Step>
+      <Step title="Select Audience & Send">
+        Choose your list, review, and click `Send`.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="HTML Editor" icon="code">
+    Use custom HTML for advanced designs.
+    
+````html
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Welcome aboard!</h1>
+  <p>Track opens and clicks in Analytics.</p>
+</body>
+</html>
+````
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Explore Features" icon="zap" href="/docs/features">
+    Dive into forms, templates, and analytics.
+  </Card>
+  <Card title="Best Practices" icon="book-open" href="/docs/guides">
+    Learn email deliverability tips.
+  </Card>
+</Columns>
+
+<Callout kind="tip">
+  Monitor your first campaign in `Analytics` for open rates and engagement.
+</Callout>

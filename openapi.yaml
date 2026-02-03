@@ -1,185 +1,975 @@
 openapi: '3.0.0'
 info:
   version: 1.0.0
-  title: Aly Sidi
+  title: tinyEmail
+  description: |
+    tinyEmail API specification.
+
+    # Authentication
+
+    All requests must include your API key in the `X-API-KEY` header:
+
+    `X-API-KEY: YOUR_API_KEY`
+
+    Requests without a valid API key will be rejected.
   license:
-    name: MIT
-servers:
-  - url: http://petstore.swagger.io/v1
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: tinyEmail Support
+    url: https://tinyemail.com
+    email: support@tinyemail.com
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Audiences
+    description: Manage contact audiences and their members.
+  - name: Campaigns
+    description: Manage email campaigns and their schedules.
+  - name: Sender
+    description: Manage sender identities and related details.
+  - name: Suppressions
+    description: Manage suppression lists and their scopes.
 paths:
-  /documents:
-    get:
-      summary: List all documents
-      operationId: listDocuments
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        200:
-          description: An paged array of documents
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Documents'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+  /audiences:
     post:
-      summary: Create document
-      operationId: createDocument
+      tags:
+        - Audiences
+      operationId: createAudience
+      summary: Create Audience
+      description: Create a new audience with an optional list of members.
+      requestBody:
+        required: true
+        description: Audience details and optional members to include.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAudienceRequest'
+            example:
+              name: Newsletter Subscribers
+              members:
+                - email: alice@example.com
+                  firstName: Alice
+                  lastName: Smith
+                - email: bob@example.com
       responses:
-        201:
-          description: Null response
-        default:
-          description: unexpected error
+        '200':
+          description: Audience created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-  /documents/{documentId}:
+                $ref: '#/components/schemas/CreateAudienceResponse'
+        '400':
+          description: Bad Request. Invalid audience or member data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '405':
+          description: Method Not Allowed.
     get:
-      summary: Get document info
-      operationId: showDocumentById
+      tags:
+        - Audiences
+      operationId: listAudiences
+      summary: Get Audiences
+      description: Retrieve a list of audiences.
+      responses:
+        '200':
+          description: A list of audiences.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAudiencesResponse'
+        '400':
+          description: Bad Request. Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '405':
+          description: Method Not Allowed.
+  /audiences/{id}:
+    put:
+      tags:
+        - Audiences
+      operationId: updateAudience
+      summary: Update Audience
+      description: Assign or unassign members from an existing audience.
       parameters:
-        - name: documentId
+        - name: id
           in: path
           required: true
-          description: The id of the document to retrieve
+          description: ID of the audience to update.
           schema:
             type: string
+            format: uuid
+      requestBody:
+        required: true
+        description: Members to assign or unassign from the audience.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAudienceRequest'
+            example:
+              assignMembers:
+                - email: charlie@example.com
+                  firstName: Charlie
+              unAssignMembers:
+                - alice@example.com
       responses:
-        200:
-          description: Expected response to a valid request
+        '204':
+          description: Audience updated successfully. No content returned.
+        '400':
+          description: Bad Request. Invalid audience update payload.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Documents'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /projects:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Audience not found.
+        '405':
+          description: Method Not Allowed.
+  /campaign/{id}:
     get:
-      summary: List all projects
-      operationId: listProjects
+      tags:
+        - Campaigns
+      operationId: getCampaign
+      summary: Get Campaign
+      description: Retrieve a campaign by its ID.
       parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        200:
-          description: An paged array of projects
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Projects'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Create project
-      operationId: createProject
-      responses:
-        201:
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /projects/{projectId}:
-    get:
-      summary: Get project info
-      operationId: showProjectById
-      parameters:
-        - name: projectId
+        - name: id
           in: path
           required: true
-          description: The id of the project to retrieve
+          description: ID of the campaign to retrieve.
           schema:
             type: string
+            format: uuid
       responses:
-        200:
-          description: Expected response to a valid request
+        '200':
+          description: Campaign retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Projects'
-        default:
-          description: unexpected error
+                $ref: '#/components/schemas/Campaign'
+        '400':
+          description: Bad Request. Invalid campaign ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Campaign not found.
+        '405':
+          description: Method Not Allowed.
+    put:
+      tags:
+        - Campaigns
+      operationId: updateCampaign
+      summary: Update Campaign
+      description: Update campaign content, sender, contacts, and schedule.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the campaign to update.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        description: Campaign properties to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCampaignRequest'
+            example:
+              contentSourceUrl: https://example.com/campaigns/spring-sale
+              campaign:
+                name: Spring Sale
+                subject: Spring Sale is here
+                previewText: Save big this spring
+                senderId: "123e4567-e89b-12d3-a456-426614174000"
+                template:
+                  html: "<html><body><h1>Spring Sale</h1></body></html>"
+              contactIds:
+                - "11111111-1111-1111-1111-111111111111"
+                - "22222222-2222-2222-2222-222222222222"
+              schedule:
+                dateTime: '2025-03-01T10:00:00Z'
+                days:
+                  - MONDAY
+                  - WEDNESDAY
+                time: '10:00'
+      responses:
+        '204':
+          description: Campaign updated successfully. No content returned.
+        '400':
+          description: Bad Request. Invalid campaign data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Campaign not found.
+        '405':
+          description: Method Not Allowed.
+    delete:
+      tags:
+        - Campaigns
+      operationId: deleteCampaign
+      summary: Delete Campaign
+      description: Delete a campaign by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the campaign to delete.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Campaign deleted successfully. No content returned.
+        '400':
+          description: Bad Request. Invalid campaign ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Campaign not found.
+        '405':
+          description: Method Not Allowed.
+  /campaign/{id}/start:
+    put:
+      tags:
+        - Campaigns
+      operationId: startCampaign
+      summary: Start Campaign
+      description: Start a campaign immediately or at the specified scheduled time.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the campaign to start.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        description: Optional schedule specifying when the campaign should start.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartCampaignRequest'
+            example:
+              schedule:
+                dateTime: '2025-03-01T10:00:00Z'
+      responses:
+        '204':
+          description: Campaign has been started. No content returned.
+        '400':
+          description: Bad Request. Invalid start request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Campaign not found.
+        '405':
+          description: Method Not Allowed.
+  /sender-details:
+    post:
+      tags:
+        - Sender
+      operationId: createSenderDetails
+      summary: Create Sender Details
+      description: Create a new sender identity to be used in campaigns.
+      requestBody:
+        required: true
+        description: Sender details including contact information and address.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SenderDetailsRequest'
+            example:
+              name: Marketing Team
+              email: marketing@example.com
+              replyTo: support@example.com
+              address: 123 Main Street
+              city: Toronto
+              region: ON
+              country: CA
+              postalCode: M5V2T6
+      responses:
+        '200':
+          description: Sender details created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SenderDetails'
+        '400':
+          description: Bad Request. Invalid sender details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '405':
+          description: Method Not Allowed.
+  /sender-details/{id}:
+    delete:
+      tags:
+        - Sender
+      operationId: deleteSenderDetails
+      summary: Delete Sender Details
+      description: Delete an existing sender identity.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the sender details to delete.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Sender details deleted successfully. No content returned.
+        '400':
+          description: Bad Request. Invalid sender ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Sender details not found.
+        '405':
+          description: Method Not Allowed.
+  /suppression/import:
+    post:
+      tags:
+        - Suppressions
+      operationId: importSuppression
+      summary: Import Suppression File
+      description: Import a suppression file and create a suppression list.
+      requestBody:
+        required: true
+        description: Suppression file and metadata.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SuppressionImportRequest'
+      responses:
+        '200':
+          description: Suppression list created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuppressionList'
+        '400':
+          description: Bad Request. Invalid suppression import request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '405':
+          description: Method Not Allowed.
+  /suppression:
+    get:
+      tags:
+        - Suppressions
+      operationId: listSuppressions
+      summary: Get Suppression Lists
+      description: Retrieve all suppression lists.
+      responses:
+        '200':
+          description: A list of suppression lists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSuppressionsResponse'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '405':
+          description: Method Not Allowed.
+  /suppression/{id}:
+    get:
+      tags:
+        - Suppressions
+      operationId: getSuppression
+      summary: Get Suppression List
+      description: Retrieve a suppression list by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the suppression list to retrieve.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Suppression list retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuppressionList'
+        '400':
+          description: Bad Request. Invalid suppression list ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Suppression list not found.
+        '405':
+          description: Method Not Allowed.
+  /suppression/{id}/change-scope/{scope}:
+    put:
+      tags:
+        - Suppressions
+      operationId: changeSuppressionScope
+      summary: Change Suppression Scope
+      description: Change the scope of a suppression list.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the suppression list to update.
+          schema:
+            type: integer
+            format: int64
+        - name: scope
+          in: path
+          required: true
+          description: New scope for this suppression list.
+          schema:
+            type: string
+            enum:
+              - LOCAL
+              - GLOBAL
+      responses:
+        '200':
+          description: Suppression list scope updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuppressionList'
+        '400':
+          description: Bad Request. Invalid scope change request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized. Missing or invalid API key.
+        '404':
+          description: Suppression list not found.
+        '405':
+          description: Method Not Allowed.
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
   schemas:
-    Document:
+    AudienceMember:
+      type: object
+      description: A contact to be included in an audience.
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the contact.
+        firstName:
+          type: string
+          description: First name of the contact.
+        lastName:
+          type: string
+          description: Last name of the contact.
+        source:
+          type: string
+          description: Source of the contact.
+        birthday:
+          type: string
+          description: Birthday of the contact.
+        tags:
+          type: array
+          description: Tags associated with the contact.
+          items:
+            type: string
+        currency:
+          type: string
+          description: Preferred currency of the contact.
+        country:
+          type: string
+          description: Country of the contact.
+        province:
+          type: string
+          description: Province or state of the contact.
+        city:
+          type: string
+          description: City of the contact.
+        address1:
+          type: string
+          description: Primary address line of the contact.
+        address2:
+          type: string
+          description: Secondary address line of the contact.
+        phone:
+          type: string
+          description: Phone number of the contact.
+        postalCode:
+          type: string
+          description: Postal or ZIP code of the contact.
+        company:
+          type: string
+          description: Company associated with the contact.
+        lastPurchaseOrder:
+          type: string
+          description: Identifier for the last purchase order.
+        lastPurchasePrice:
+          type: string
+          description: Price of the last purchase.
+        latestOrderId:
+          type: string
+          description: Identifier of the latest order.
+        lastPurchaseDate:
+          type: string
+          description: Date of the last purchase.
+    CreateAudienceRequest:
+      type: object
+      description: Request body for creating an audience.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the audience.
+        members:
+          type: array
+          description: Optional list of members to add to this audience.
+          items:
+            $ref: '#/components/schemas/AudienceMember'
+    CreateAudienceResponse:
+      type: object
+      description: Response returned after creating an audience.
       required:
         - id
-        - title
       properties:
         id:
-          type: integer
-          format: int64
-        title:
           type: string
-        content:
-          type: string
-    Documents:
-      type: array
-      items:
-        $ref: '#/components/schemas/Document'
-    Project:
+          format: uuid
+          description: Unique identifier of the created audience.
+    AudienceSummary:
+      type: object
+      description: Summary information about an audience.
       required:
         - id
         - name
+        - numberOfMembers
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the audience.
+        name:
+          type: string
+          description: Name of the audience.
+        numberOfMembers:
+          type: integer
+          format: int32
+          description: Number of members in the audience.
+    ListAudiencesResponse:
+      type: object
+      description: Response containing a list of audiences.
+      required:
+        - contacts
+      properties:
+        contacts:
+          type: array
+          description: List of audience summaries.
+          items:
+            $ref: '#/components/schemas/AudienceSummary'
+    UpdateAudienceRequest:
+      type: object
+      description: Request body for updating an audience's members.
+      properties:
+        assignMembers:
+          type: array
+          description: Members to assign to the audience.
+          items:
+            $ref: '#/components/schemas/AudienceMember'
+        unAssignMembers:
+          type: array
+          description: Email addresses of members to unassign from the audience.
+          items:
+            type: string
+            format: email
+    CampaignCore:
+      type: object
+      description: Core campaign settings such as name and subject.
+      properties:
+        name:
+          type: string
+          description: Name of the campaign.
+        subject:
+          type: string
+          description: Subject line of the campaign email.
+        previewText:
+          type: string
+          description: Preview text shown in the inbox.
+    CampaignTemplate:
+      type: object
+      description: Campaign HTML template.
+      properties:
+        html:
+          type: string
+          description: HTML content for the campaign.
+    CampaignSchedule:
+      type: object
+      description: Scheduling options for a campaign.
+      properties:
+        dateTime:
+          type: string
+          format: date-time
+          description: Date and time when the campaign should be sent.
+        days:
+          type: array
+          description: Days of the week to send the campaign.
+          items:
+            type: string
+        time:
+          type: string
+          description: Time of day to send the campaign (for recurring schedules).
+    Campaign:
+      type: object
+      description: Campaign details and statistics.
+      required:
+        - id
+        - status
+        - campaign
+        - senderId
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the campaign.
+        status:
+          type: string
+          description: Current status of the campaign.
+        contentSourceUrl:
+          type: string
+          description: URL of the content source for the campaign.
+        senderId:
+          type: string
+          format: uuid
+          description: Identifier of the sender for this campaign.
+        campaign:
+          $ref: '#/components/schemas/CampaignCore'
+        contactIds:
+          type: array
+          description: IDs of contacts targeted by this campaign.
+          items:
+            type: string
+        schedule:
+          $ref: '#/components/schemas/CampaignSchedule'
+        delivered:
+          type: integer
+          format: int64
+          description: Number of emails delivered.
+        requests:
+          type: integer
+          format: int64
+          description: Number of send requests.
+        sent:
+          type: integer
+          format: int64
+          description: Number of emails sent.
+        open:
+          type: integer
+          format: int64
+          description: Number of unique opens.
+        totalOpen:
+          type: integer
+          format: int64
+          description: Total number of opens.
+        clicked:
+          type: integer
+          format: int64
+          description: Number of unique clicks.
+        totalClicked:
+          type: integer
+          format: int64
+          description: Total number of clicks.
+        unsubscribed:
+          type: integer
+          format: int64
+          description: Number of recipients who unsubscribed.
+        bounced:
+          type: integer
+          format: int64
+          description: Number of bounced emails.
+        openProgress:
+          type: integer
+          format: int64
+          description: Number of opens processed so far.
+        totalOpenProgress:
+          type: number
+          format: double
+          description: Progress of total opens as a percentage.
+        totalClickedProgress:
+          type: number
+          format: double
+          description: Progress of total clicks as a percentage.
+        unsubscribedProgress:
+          type: number
+          format: double
+          description: Progress of unsubscribes as a percentage.
+        deliveredProgress:
+          type: number
+          format: double
+          description: Progress of delivered emails as a percentage.
+        bouncedProgress:
+          type: number
+          format: double
+          description: Progress of bounced emails as a percentage.
+        clickedProgress:
+          type: number
+          format: double
+          description: Progress of clicked emails as a percentage.
+    UpdateCampaignRequest:
+      type: object
+      description: Request body for updating a campaign.
+      properties:
+        contentSourceUrl:
+          type: string
+          description: URL of the content source for the campaign.
+        campaign:
+          type: object
+          description: Core campaign configuration.
+          properties:
+            name:
+              type: string
+              description: Name of the campaign.
+            subject:
+              type: string
+              description: Subject line of the campaign email.
+            previewText:
+              type: string
+              description: Preview text shown in the inbox.
+            senderId:
+              type: string
+              format: uuid
+              description: Identifier of the sender for this campaign.
+            template:
+              $ref: '#/components/schemas/CampaignTemplate'
+        contactIds:
+          type: array
+          description: IDs of contacts targeted by this campaign.
+          items:
+            type: string
+        schedule:
+          $ref: '#/components/schemas/CampaignSchedule'
+    StartCampaignRequest:
+      type: object
+      description: Request body for starting a campaign.
+      properties:
+        schedule:
+          $ref: '#/components/schemas/CampaignSchedule'
+    SenderDetailsRequest:
+      type: object
+      description: Request body for creating sender details.
+      required:
+        - name
+        - email
+        - address
+        - city
+        - region
+        - country
+        - postalCode
+      properties:
+        name:
+          type: string
+          description: Display name of the sender.
+        email:
+          type: string
+          format: email
+          description: Email address of the sender.
+        replyTo:
+          type: string
+          format: email
+          description: Reply-to email address.
+        address:
+          type: string
+          description: Street address of the sender.
+        city:
+          type: string
+          description: City of the sender.
+        region:
+          type: string
+          description: State or region of the sender.
+        country:
+          type: string
+          description: Country code of the sender.
+        postalCode:
+          type: string
+          description: Postal or ZIP code of the sender.
+    SenderDetails:
+      type: object
+      description: Sender identity details.
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the sender details.
+        name:
+          type: string
+          description: Display name of the sender.
+        email:
+          type: string
+          format: email
+          description: Email address of the sender.
+        replyTo:
+          type: string
+          description: Reply-to email address.
+        address:
+          type: string
+          description: Street address of the sender.
+        city:
+          type: string
+          description: City of the sender.
+        region:
+          type: string
+          description: State or region of the sender.
+        country:
+          type: string
+          description: Country code of the sender.
+        postalCode:
+          type: string
+          description: Postal or ZIP code of the sender.
+        emailConfirmed:
+          type: boolean
+          description: Indicates whether the sender email has been confirmed.
+        defaults:
+          type: boolean
+          description: Indicates whether this sender is used as default.
+        assignedToCampaigns:
+          type: boolean
+          description: Indicates whether this sender is assigned to any campaigns.
+        dkimSigned:
+          type: boolean
+          description: Indicates whether emails from this sender are DKIM signed.
+    SuppressionImportMetadata:
+      type: object
+      description: Metadata describing the suppression import.
+      required:
+        - name
+        - scope
+      properties:
+        name:
+          type: string
+          description: Name of the suppression list.
+        scope:
+          type: string
+          description: Scope of the suppression list.
+          enum:
+            - LOCAL
+            - GLOBAL
+    SuppressionImportRequest:
+      type: object
+      description: Request body for importing a suppression file.
+      required:
+        - suppressionFile
+        - suppression
+      properties:
+        suppressionFile:
+          type: string
+          format: binary
+          description: Suppression file to upload.
+        suppression:
+          $ref: '#/components/schemas/SuppressionImportMetadata'
+    SuppressionList:
+      type: object
+      description: Suppression list details.
+      required:
+        - id
+        - name
+        - type
+        - scope
       properties:
         id:
           type: integer
           format: int64
+          description: Unique identifier of the suppression list.
         name:
           type: string
-        description:
+          description: Name of the suppression list.
+        type:
           type: string
-    Projects:
-      type: array
-      items:
-        $ref: '#/components/schemas/Project'
-    Error:
+          description: Type of suppression identifiers contained in the list.
+          enum:
+            - EMAIL
+            - MD5
+            - SHA256
+        scope:
+          type: string
+          description: Scope of the suppression list.
+          enum:
+            - LOCAL
+            - GLOBAL
+        fileProcessStatus:
+          type: string
+          description: Status of processing the uploaded suppression file.
+        numberOfMembers:
+          type: integer
+          format: int64
+          description: Number of entries in this suppression list.
+    ListSuppressionsResponse:
+      type: object
+      description: Response containing a list of suppression lists.
       required:
-        - code
+        - suppressions
+      properties:
+        suppressions:
+          type: array
+          description: List of suppression lists.
+          items:
+            $ref: '#/components/schemas/SuppressionList'
+    Error400:
+      type: object
+      description: Error response for invalid requests.
+      required:
         - message
       properties:
-        code:
-          type: integer
-          format: int32
         message:
           type: string
+          description: Description of the error.
